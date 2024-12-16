@@ -37,6 +37,11 @@ const routes = [
     name: 'AllPlayers',
     component: AllPlayers,
   },
+  {
+    path: "/pack/:title",
+    name: "PackDetails",
+    component: PackDetails,
+  },
 
   // {
   //   path: '/pack',

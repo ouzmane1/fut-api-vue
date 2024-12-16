@@ -1,7 +1,6 @@
 <template>
-
   <div class="bg-gray-100 min-h-screen flex flex-col items-center justify-start">
-    <!-- titre  -->
+    <!-- Titre -->
     <div class="w-full text-center py-8">
       <h1 class="text-2xl font-bold uppercase tracking-wider">Ouvrir des Packs</h1>
     </div>
@@ -14,7 +13,7 @@
         title="Pack Bronze"
         prix="1200"
         buttonText="Acheter"
-        @button-click="handleCardClick('PackBronze')"
+        @button-click="handleCardClick('Bronze')"
       />
 
       <!-- Deuxième carte -->
@@ -24,7 +23,7 @@
         title="Pack Argent"
         prix="1200"
         buttonText="Acheter"
-        @button-click="handleCardClick('PackArgent')"
+        @button-click="handleCardClick('Silver')"
       />
 
       <!-- Troisième carte -->
@@ -34,17 +33,17 @@
         title="Pack Or"
         prix="1200"
         buttonText="Acheter"
-        @button-click="handleCardClick('PackOr')"
+        @button-click="handleCardClick('Gold')"
       />
 
-      <!-- Quatieme carte -->
+      <!-- Quatrième carte -->
       <CardComponent
         imageSrc="./img/icon.png"
-        imageAlt="Third Card"
-        title="Pack Icone"
+        imageAlt="Fourth Card"
+        title="Pack Icon"
         prix="1200"
         buttonText="Acheter"
-        @button-click="handleCardClick('PackIcone')"
+        @button-click="handleCardClick('Icon')"
       />
     </div>
   </div>
@@ -59,11 +58,10 @@ export default {
     CardComponent,
   },
   methods: {
-    handleCardClick(PackBronze) {
+    handleCardClick(packType) {
       // Redirige vers la page des détails du pack
-      this.$router.push({ name: 'PackDetails', params: { title: PackBronze } });
+      this.$router.push({ name: 'PackDetails', params: { title: packType } });
     },
   },
 };
 </script>
-
