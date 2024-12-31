@@ -2,8 +2,8 @@
   <div class="bg-gray-100 min-h-screen p-6">
     <!-- Titre -->
     <div class="text-center mb-6">
-      <h1 class="text-3xl font-bold text-blue-800">Tous les Joueurs</h1>
-      <p class="text-sm text-gray-600">Utilisez les filtres pour affiner votre recherche</p>
+      <h1 class="text-3xl font-bold text-blue-800">Mes Joueurs</h1>
+      <p class="text-sm text-gray-600">Gérez vos joueurs ici</p>
     </div>
 
     <!-- Affichage des filtres appliqués -->
@@ -126,24 +126,9 @@
         >
           <option value="">Sélectionner le type</option>
           <option value="Bronze">Bronze</option>
-          <option value="Silver">Silver</option>
-          <option value="Gold">Gold</option>
-          <option value="Icon">Icon</option>
-        </select>
-      </div>
-      <div>
-        <label for="packType" class="block text-sm font-medium text-gray-700">Type de Pack</label>
-        <select
-          id="packType"
-          v-model="filters.pack_type"
-          @change="applyFilters"
-          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        >
-          <option value="">Tous les packs</option>
-          <option value="Bronze">Bronze</option>
-          <option value="Silver">Silver</option>
-          <option value="Gold">Gold</option>
-          <option value="Icon">Icon</option>
+          <option value="Silver">Argent</option>
+          <option value="Gold">Or</option>
+          <option value="Icon">Icône</option>
         </select>
       </div>
     </div>
@@ -157,21 +142,12 @@
         :key="player.id"
         class="bg-white shadow rounded-md p-4"
       >
-        <div class="border-b pb-2 mb-2">
-          <h3 class="text-lg font-bold text-gray-800">{{ player.name }}</h3>
-          <p class="text-xs text-gray-500">Obtenu le {{ new Date(player.obtained_at).toLocaleDateString() }}</p>
-        </div>
-        <div class="space-y-1">
-          <p class="text-sm text-gray-600">Club : {{ player.club }}</p>
-          <p class="text-sm text-gray-600">Nation : {{ player.nation }}</p>
-          <p class="text-sm text-gray-600">Note : {{ player.rating }}</p>
-          <p class="text-sm text-gray-600">Prix : {{ player.price }} crédits</p>
-          <p class="text-sm text-gray-600">Rareté : {{ player.rarity }}</p>
-          <p class="text-sm text-gray-600">Type : {{ player.type }}</p>
-        </div>
-        <div class="mt-2 pt-2 border-t">
-          <p class="text-sm font-medium text-blue-600">Pack {{ player.pack_name }} ({{ player.pack_type }})</p>
-        </div>
+        <h3 class="text-lg font-bold text-gray-800">{{ player.name }}</h3>
+        <p class="text-sm text-gray-600">Club : {{ player.club }}</p>
+        <p class="text-sm text-gray-600">Nation : {{ player.nation }}</p>
+        <p class="text-sm text-gray-600">Note : {{ player.rating }}</p>
+        <p class="text-sm text-gray-600">Prix : {{ player.price }} crédits</p>
+        <button @click="sellPlayer(player.idPackPlayer)" class="mt-2 bg-red-500 text-white px-4 py-2 rounded">Vendre</button>
       </div>
     </div>
 
@@ -203,7 +179,7 @@ export default {
   name: "AllPlayers",
   data() {
     return {
-      players: [],
+      players: [], // Liste des joueurs
       filters: {
         name: "",
         club: "",
@@ -212,23 +188,25 @@ export default {
         max_rating: null,
         rarity: "",
         type: "",
-        pack_type: ""
       },
-      availableClubs: [],
-      availableNations: [],
+      availableClubs: [], // Liste dynamique des clubs
+      availableNations: [], // Liste dynamique des nations
       page: 1,
       limit: 20,
       total: 0,
       loading: true,
       error: null,
-      //userId: localStorage.getItem('userId') // Récupérer l'ID utilisateur du localStorage
     };
   },
   computed: {
     appliedFilters() {
-      return Object.entries(this.filters)
-        .filter(([_, value]) => value !== "" && value !== null)
-        .map(([key, value]) => ({ key, value }));
+      let applied = [];
+      for (const [key, value] of Object.entries(this.filters)) {
+        if (value) {
+          applied.push({ key, value });
+        }
+      }
+      return applied;
     },
     totalPages() {
       return Math.ceil(this.total / this.limit);
@@ -238,6 +216,14 @@ export default {
     async fetchPlayers() {
       this.loading = true;
       this.error = null;
+
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      if (!user || !user.id) {
+        this.error = 'Utilisateur non authentifié';
+        this.loading = false;
+        return;
+      }
 
       const params = {
         ...this.filters,
@@ -249,30 +235,35 @@ export default {
         const response = await axios.get(
           "http://127.0.0.1:8000/api/users/players/advanced-filter",
           {
-            params,
             headers: {
-              'X-User-Id': this.userId
-            }
+              'X-User-Id': user.id,
+            },
+            params,
           }
         );
         this.players = response.data.players;
         this.total = response.data.total;
       } catch (err) {
         this.error = "Erreur lors de la récupération des joueurs.";
-        console.error(err);
       } finally {
         this.loading = false;
       }
     },
     async fetchClubsAndNations() {
       try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user || !user.id) {
+          this.error = 'Utilisateur non authentifié';
+          return;
+        }
+
         const response = await axios.get(
-          "http://127.0.0.1:8000/api/soccerplayers/user",
+          "http://127.0.0.1:8000/api/users/players/advanced-filter",
           {
-            params: { page: 1, limit: 100 },
             headers: {
-              'X-User-Id': this.userId
-            }
+              'X-User-Id': user.id,
+            },
+            params: { page: 1, limit: 100 },
           }
         );
         const clubs = new Set();
@@ -283,24 +274,44 @@ export default {
           nations.add(player.nation);
         });
 
-        this.availableClubs = Array.from(clubs).sort();
-        this.availableNations = Array.from(nations).sort();
+        this.availableClubs = Array.from(clubs);
+        this.availableNations = Array.from(nations);
       } catch (err) {
         this.error = "Erreur lors de la récupération des clubs et nations.";
-        console.error(err);
       }
     },
     applyFilters() {
-      this.page = 1;
+      this.page = 1; // Réinitialise la page à la première page lors du changement de filtre
       this.fetchPlayers();
     },
     removeFilter(index) {
       const filterKey = this.appliedFilters[index].key;
-      if (filterKey.includes('min_') || filterKey.includes('max_')) {
-        this.filters[filterKey] = null;
-      } else {
-        this.filters[filterKey] = '';
+
+      // Réinitialise la valeur du filtre en fonction de son type
+      switch(filterKey) {
+        case 'name':
+          this.filters.name = '';
+          break;
+        case 'club':
+          this.filters.club = '';
+          break;
+        case 'nation':
+          this.filters.nation = '';
+          break;
+        case 'min_rating':
+          this.filters.min_rating = null;
+          break;
+        case 'max_rating':
+          this.filters.max_rating = null;
+          break;
+        case 'rarity':
+          this.filters.rarity = '';
+          break;
+        case 'type':
+          this.filters.type = '';
+          break;
       }
+
       this.applyFilters();
     },
     changePage(newPage) {
@@ -309,20 +320,37 @@ export default {
         this.fetchPlayers();
       }
     },
+    async sellPlayer(userPackPlayerId) {
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      if (!user || !user.id) {
+        this.error = 'Utilisateur non authentifié';
+        return;
+      }
+
+      try {
+        console.log('Selling player with ID:', userPackPlayerId);
+        console.log('User ID:', user.id);
+
+        const response = await axios.post(`http://127.0.0.1:8000/api/players/sell/${userPackPlayerId}`, {}, {
+          headers: {
+            'X-User-Id': user.id,
+          },
+        });
+
+        console.log('Sell player response:', response.data);
+
+        this.fetchPlayers(); // Rechargez la liste des joueurs après la vente
+      } catch (err) {
+        console.error('Error selling player:', err);
+        this.error = 'Erreur lors de la vente du joueur.';
+      }
+    },
   },
   created() {
-    if (!this.userId) {
-      this.error = "Utilisateur non connecté";
-      return;
-    }
     this.fetchClubsAndNations();
     this.fetchPlayers();
   },
 };
 </script>
 
-<style scoped>
-.bg-gray-100 {
-  background-color: #f7fafc;
-}
-</style>

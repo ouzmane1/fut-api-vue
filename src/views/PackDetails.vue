@@ -62,10 +62,11 @@
 
     <!-- Crédits restants -->
     <div v-if="!loading && !error" class="mt-8 text-center">
-      <p class="text-lg font-bold text-blue-600">Crédits restants : {{ user }}</p>
+      <p class="text-lg font-bold text-blue-600">Crédits restants : {{ userCredits }}</p>
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from "axios";
@@ -95,37 +96,37 @@ export default {
   },
   methods: {
     async fetchPackDetails() {
-  try {
-    // Récupérer les informations de l'utilisateur depuis localStorage
-    const user = JSON.parse(localStorage.getItem('user'));
+      try {
+        // Récupérer les informations de l'utilisateur depuis localStorage
+        const user = JSON.parse(localStorage.getItem('user'));
 
-    if (!user || !user.id) {
-      throw new Error('Utilisateur non authentifié');
-    }
+        if (!user || !user.id) {
+          throw new Error('Utilisateur non authentifié');
+        }
 
-    // Ajouter l'ID utilisateur dans les en-têtes de la requête
-    const response = await axios.get(
-      `http://127.0.0.1:8000/api/pack/random/${this.packName}`,
-      {
-        headers: {
-          'X-User-Id': user.id,  // Ajouter l'ID utilisateur ici
-        },
+        // Ajouter l'ID utilisateur dans les en-têtes de la requête
+        const response = await axios.get(
+          `http://127.0.0.1:8000/api/pack/random/${this.packName}`,
+          {
+            headers: {
+              'X-User-Id': user.id,  // Ajouter l'ID utilisateur ici
+            },
+          }
+        );
+
+        this.packData = response.data;
+        this.userCredits = response.data.userCredits; // Mettre à jour les crédits de l'utilisateur
+      } catch (error) {
+        console.error("Error fetching pack details:", error);
+        this.error =
+          error.response?.data?.error || "Une erreur s'est produite lors de la récupération des données.";
+      } finally {
+        this.loading = false;
+        if (this.firstPlayer) {
+          this.startAnimation();
+        }
       }
-    );
-
-    this.packData = response.data;
-    this.userCredits = response.data.userCredits; // Mettre à jour les crédits de l'utilisateur
-  } catch (error) {
-    console.error("Error fetching pack details:", error);
-    this.error =
-      error.response?.data?.error || "Une erreur s'est produite lors de la récupération des données.";
-  } finally {
-    this.loading = false;
-    if (this.firstPlayer) {
-      this.startAnimation();
-    }
-  }
-},
+    },
     startAnimation() {
       // Animation étape par étape
       const steps = [
@@ -169,5 +170,4 @@ export default {
     this.fetchPackDetails();
   },
 };
-
 </script>

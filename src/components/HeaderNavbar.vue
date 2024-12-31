@@ -29,7 +29,6 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import Cookies from 'js-cookie'
 
 const router = useRouter()
 const isAuthenticated = ref(false)
@@ -37,9 +36,9 @@ const currentUser = ref({})
 
 const handleLogout = async () => {
   try {
-    await axios.post('/api/logout')
-    Cookies.remove('user_id')
-    Cookies.remove('username')
+    await axios.post('http://localhost:8000/api/logout')
+    localStorage.removeItem('user_id')
+    localStorage.removeItem('username')
     isAuthenticated.value = false
     currentUser.value = {}
     router.push('/')
@@ -49,8 +48,8 @@ const handleLogout = async () => {
 }
 
 const checkCurrentUser = () => {
-  const userId = Cookies.get('user_id')
-  const username = Cookies.get('username')
+  const userId = localStorage.getItem('user_id')
+  const username = localStorage.getItem('username')
   if (userId && username) {
     isAuthenticated.value = true
     currentUser.value = { id: userId, username }

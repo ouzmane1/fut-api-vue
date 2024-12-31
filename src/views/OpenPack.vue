@@ -11,7 +11,7 @@
         imageSrc="./img/bronze-bg.png"
         imageAlt="First Card"
         title="Pack Bronze"
-        prix="1200"
+        prix="400"
         buttonText="Acheter"
         @button-click="handleCardClick('Bronze')"
       />
@@ -21,7 +21,7 @@
         imageSrc="./img/silver.png"
         imageAlt="Second Card"
         title="Pack Argent"
-        prix="1200"
+        prix="800"
         buttonText="Acheter"
         @button-click="handleCardClick('Silver')"
       />
@@ -41,7 +41,7 @@
         imageSrc="./img/icon.png"
         imageAlt="Fourth Card"
         title="Pack Icon"
-        prix="1200"
+        prix="2000"
         buttonText="Acheter"
         @button-click="handleCardClick('Icon')"
       />
