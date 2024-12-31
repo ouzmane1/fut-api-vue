@@ -1,18 +1,21 @@
 <template>
-<HeaderNavbar/>
-<!-- <HomeApi/> -->
-<RouterView/>
+  <div id="app">
+    <HeaderNavbar />
+    <router-view></router-view>
+  </div>
 </template>
 
 <script>
 import HeaderNavbar from './components/HeaderNavbar.vue';
-// import HomeApi from './views/HomeApi.vue';
 
 export default {
-  name: "App",
+  name: 'App',
   components: {
-    HeaderNavbar,
-    // HomeApi,
-  },
+    HeaderNavbar
+  }
 };
 </script>
+
+<style>
+/* Ajoutez vos styles globaux ici */
+</style>

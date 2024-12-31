@@ -48,16 +48,9 @@
     </div>
 
     <!-- Liste des autres joueurs -->
-    <div
-      v-if="!loading && !error && otherPlayersVisible"
-      class="w-full max-w-5xl px-6"
-    >
+    <div v-if="!loading && !error && otherPlayersVisible" class="w-full max-w-5xl px-6">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div
-          v-for="player in otherPlayers"
-          :key="player.id"
-          class="bg-white rounded-lg shadow-md p-4"
-        >
+        <div v-for="player in otherPlayers" :key="player.id" class="bg-white rounded-lg shadow-md p-4">
           <h4 class="text-lg font-bold text-gray-800">{{ player.name }}</h4>
           <p class="text-sm text-gray-600">{{ player.club }}</p>
           <p class="text-sm text-gray-600">Nation : {{ player.nation }}</p>
@@ -65,6 +58,11 @@
           <p class="text-sm text-gray-600">Prix : {{ player.price }} crédits</p>
         </div>
       </div>
+    </div>
+
+    <!-- Crédits restants -->
+    <div v-if="!loading && !error" class="mt-8 text-center">
+      <p class="text-lg font-bold text-blue-600">Crédits restants : {{ userCredits }}</p>
     </div>
   </div>
 </template>
@@ -84,6 +82,7 @@ export default {
       animatedRating: 0, // Compteur pour l'animation de la note
       animationFinished: false, // Indique si l'animation est terminée
       otherPlayersVisible: false, // Contrôle l'affichage des autres joueurs
+      userCredits: 0, // Crédits de l'utilisateur
     };
   },
   computed: {
@@ -96,21 +95,37 @@ export default {
   },
   methods: {
     async fetchPackDetails() {
-      try {
-        const response = await axios.get(
-          `http://127.0.0.1:8000/pack/random/${this.packName}`
-        );
-        this.packData = response.data;
-      } catch (error) {
-        this.error =
-          error.response?.data?.error || "Une erreur s'est produite lors de la récupération des données.";
-      } finally {
-        this.loading = false;
-        if (this.firstPlayer) {
-          this.startAnimation();
-        }
+  try {
+    // Récupérer les informations de l'utilisateur depuis localStorage
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!user || !user.id) {
+      throw new Error('Utilisateur non authentifié');
+    }
+
+    // Ajouter l'ID utilisateur dans les en-têtes de la requête
+    const response = await axios.get(
+      `http://127.0.0.1:8000/api/pack/random/${this.packName}`,
+      {
+        headers: {
+          'X-User-Id': user.id,  // Ajouter l'ID utilisateur ici
+        },
       }
-    },
+    );
+
+    this.packData = response.data;
+    this.userCredits = response.data.userCredits; // Mettre à jour les crédits de l'utilisateur
+  } catch (error) {
+    console.error("Error fetching pack details:", error);
+    this.error =
+      error.response?.data?.error || "Une erreur s'est produite lors de la récupération des données.";
+  } finally {
+    this.loading = false;
+    if (this.firstPlayer) {
+      this.startAnimation();
+    }
+  }
+},
     startAnimation() {
       // Animation étape par étape
       const steps = [
@@ -154,17 +169,5 @@ export default {
     this.fetchPackDetails();
   },
 };
-</script>
 
-<style scoped>
-/* Ajout d'effets et transitions */
-.bg-gradient-to-b {
-  background: linear-gradient(to bottom, #ebf8ff, #cfe2ff);
-}
-.shadow-md {
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-}
-.overflow-hidden {
-  overflow: hidden;
-}
-</style>
+</script>
