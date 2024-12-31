@@ -19,6 +19,7 @@
 
 <script>
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 export default {
   data() {
@@ -41,7 +42,7 @@ export default {
 
         // Stocker les informations de l'utilisateur dans localStorage
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        router.push('/');
+        this.$router.push('/');
       } catch (error) {
         this.error = error.response.data.message;
         this.success = '';
