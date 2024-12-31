@@ -62,7 +62,7 @@
 
     <!-- Crédits restants -->
     <div v-if="!loading && !error" class="mt-8 text-center">
-      <p class="text-lg font-bold text-blue-600">Crédits restants : {{ userCredits }}</p>
+      <p class="text-lg font-bold text-blue-600">Crédits restants : {{ user }}</p>
     </div>
   </div>
 </template>

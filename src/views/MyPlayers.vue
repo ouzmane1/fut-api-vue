@@ -2,13 +2,150 @@
   <div class="bg-gray-100 min-h-screen p-6">
     <!-- Titre -->
     <div class="text-center mb-6">
-      <h1 class="text-3xl font-bold text-blue-800">Mes Joueurs</h1>
-      <p class="text-sm text-gray-600">Voici la liste de vos joueurs</p>
+      <h1 class="text-3xl font-bold text-blue-800">Tous les Joueurs</h1>
+      <p class="text-sm text-gray-600">Utilisez les filtres pour affiner votre recherche</p>
     </div>
 
-    <!-- Affichage du nombre de joueurs -->
+    <!-- Affichage des filtres appliqués -->
+    <div v-if="appliedFilters.length" class="bg-white p-4 rounded-md shadow-md mb-6">
+      <h3 class="text-lg font-bold text-gray-800">Filtres appliqués :</h3>
+      <div class="flex flex-wrap gap-2 text-sm text-gray-600">
+        <div v-for="(filter, index) in appliedFilters" :key="index" class="flex items-center bg-gray-100 p-2 rounded">
+          <span class="font-medium capitalize">{{ filter.key }} : {{ filter.value }}</span>
+          <button @click="removeFilter(index)" class="ml-2 text-red-500 hover:text-red-700">×</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Affichage du nombre de joueurs filtrés -->
     <div v-if="total" class="text-center text-gray-600 mb-6">
       <p>{{ total }} joueur{{ total > 1 ? 's' : '' }} trouvé{{ total > 1 ? 's' : '' }}</p>
+    </div>
+
+    <!-- Filtres -->
+    <div class="bg-white shadow-md rounded-md p-4 mb-6 flex flex-wrap gap-4 items-end">
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700">Nom</label>
+        <input
+          id="name"
+          type="text"
+          v-model="filters.name"
+          @input="applyFilters"
+          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          placeholder="Rechercher par nom"
+        />
+      </div>
+      <div>
+        <label for="club" class="block text-sm font-medium text-gray-700">Club</label>
+        <div class="flex gap-2">
+          <select
+            id="club"
+            v-model="filters.club"
+            @change="applyFilters"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          >
+            <option value="">Sélectionner un club</option>
+            <option v-for="club in availableClubs" :key="club" :value="club">{{ club }}</option>
+          </select>
+          <input
+            v-if="filters.club && !availableClubs.includes(filters.club)"
+            id="clubCustom"
+            type="text"
+            v-model="filters.club"
+            @input="applyFilters"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            placeholder="Ou saisir un autre club"
+          />
+        </div>
+      </div>
+      <div>
+        <label for="nation" class="block text-sm font-medium text-gray-700">Nation</label>
+        <div class="flex gap-2">
+          <select
+            id="nation"
+            v-model="filters.nation"
+            @change="applyFilters"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          >
+            <option value="">Sélectionner une nation</option>
+            <option v-for="nation in availableNations" :key="nation" :value="nation">{{ nation }}</option>
+          </select>
+          <input
+            v-if="filters.nation && !availableNations.includes(filters.nation)"
+            id="nationCustom"
+            type="text"
+            v-model="filters.nation"
+            @input="applyFilters"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            placeholder="Ou saisir une autre nation"
+          />
+        </div>
+      </div>
+      <div>
+        <label for="rating" class="block text-sm font-medium text-gray-700">Note</label>
+        <div class="flex gap-2">
+          <input
+            id="minRating"
+            type="number"
+            v-model.number="filters.min_rating"
+            @input="applyFilters"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            placeholder="Min"
+          />
+          <input
+            id="maxRating"
+            type="number"
+            v-model.number="filters.max_rating"
+            @input="applyFilters"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            placeholder="Max"
+          />
+        </div>
+      </div>
+      <div>
+        <label for="rarity" class="block text-sm font-medium text-gray-700">Rareté</label>
+        <select
+          id="rarity"
+          v-model="filters.rarity"
+          @change="applyFilters"
+          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        >
+          <option value="">Sélectionner la rareté</option>
+          <option value="Common">Commun</option>
+          <option value="Rare">Rare</option>
+          <option value="Epic">Épique</option>
+        </select>
+      </div>
+      <div>
+        <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
+        <select
+          id="type"
+          v-model="filters.type"
+          @change="applyFilters"
+          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        >
+          <option value="">Sélectionner le type</option>
+          <option value="Bronze">Bronze</option>
+          <option value="Silver">Silver</option>
+          <option value="Gold">Gold</option>
+          <option value="Icon">Icon</option>
+        </select>
+      </div>
+      <div>
+        <label for="packType" class="block text-sm font-medium text-gray-700">Type de Pack</label>
+        <select
+          id="packType"
+          v-model="filters.pack_type"
+          @change="applyFilters"
+          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        >
+          <option value="">Tous les packs</option>
+          <option value="Bronze">Bronze</option>
+          <option value="Silver">Silver</option>
+          <option value="Gold">Gold</option>
+          <option value="Icon">Icon</option>
+        </select>
+      </div>
     </div>
 
     <!-- Liste des joueurs -->
@@ -18,7 +155,7 @@
       <div
         v-for="player in players"
         :key="player.id"
-        class="bg-white rounded-lg shadow-md p-4"
+        class="bg-white shadow rounded-md p-4"
       >
         <div class="border-b pb-2 mb-2">
           <h3 class="text-lg font-bold text-gray-800">{{ player.name }}</h3>
@@ -63,39 +200,61 @@
 import axios from "axios";
 
 export default {
-  name: "MyPlayers",
+  name: "AllPlayers",
   data() {
     return {
       players: [],
+      filters: {
+        name: "",
+        club: "",
+        nation: "",
+        min_rating: null,
+        max_rating: null,
+        rarity: "",
+        type: "",
+        pack_type: ""
+      },
+      availableClubs: [],
+      availableNations: [],
       page: 1,
       limit: 20,
       total: 0,
       loading: true,
       error: null,
-      userId: localStorage.getItem('userId') // Récupérer l'ID utilisateur du localStorage
+      //userId: localStorage.getItem('userId') // Récupérer l'ID utilisateur du localStorage
     };
   },
   computed: {
+    appliedFilters() {
+      return Object.entries(this.filters)
+        .filter(([_, value]) => value !== "" && value !== null)
+        .map(([key, value]) => ({ key, value }));
+    },
     totalPages() {
       return Math.ceil(this.total / this.limit);
     },
   },
   methods: {
-      async fetchPlayers() {
+    async fetchPlayers() {
       this.loading = true;
       this.error = null;
 
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/soccerplayers/user", {
-          headers: {
-            'X-User-Id': this.userId
-          },
-          params: {
-            page: this.page,
-            limit: this.limit
-          }
-        });
+      const params = {
+        ...this.filters,
+        page: this.page,
+        limit: this.limit,
+      };
 
+      try {
+        const response = await axios.get(
+          "http://127.0.0.1:8000/api/users/players/advanced-filter",
+          {
+            params,
+            headers: {
+              'X-User-Id': this.userId
+            }
+          }
+        );
         this.players = response.data.players;
         this.total = response.data.total;
       } catch (err) {
@@ -104,6 +263,45 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    async fetchClubsAndNations() {
+      try {
+        const response = await axios.get(
+          "http://127.0.0.1:8000/api/soccerplayers/user",
+          {
+            params: { page: 1, limit: 100 },
+            headers: {
+              'X-User-Id': this.userId
+            }
+          }
+        );
+        const clubs = new Set();
+        const nations = new Set();
+
+        response.data.players.forEach((player) => {
+          clubs.add(player.club);
+          nations.add(player.nation);
+        });
+
+        this.availableClubs = Array.from(clubs).sort();
+        this.availableNations = Array.from(nations).sort();
+      } catch (err) {
+        this.error = "Erreur lors de la récupération des clubs et nations.";
+        console.error(err);
+      }
+    },
+    applyFilters() {
+      this.page = 1;
+      this.fetchPlayers();
+    },
+    removeFilter(index) {
+      const filterKey = this.appliedFilters[index].key;
+      if (filterKey.includes('min_') || filterKey.includes('max_')) {
+        this.filters[filterKey] = null;
+      } else {
+        this.filters[filterKey] = '';
+      }
+      this.applyFilters();
     },
     changePage(newPage) {
       if (newPage >= 1 && newPage <= this.totalPages) {
@@ -117,6 +315,7 @@ export default {
       this.error = "Utilisateur non connecté";
       return;
     }
+    this.fetchClubsAndNations();
     this.fetchPlayers();
   },
 };
