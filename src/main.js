@@ -1,30 +1,32 @@
-// src/main.js
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import App from './App.vue'
+// main.js ou main.ts
+import { createApp } from 'vue';
+import App from './App.vue';
+
 import router from './router/router'
+import { createPinia } from 'pinia';
 
 // Tailwind
-import './assets/styles/tailwind.css'
+import './assets/styles/tailwind.css';
 
 // Fontawesome
-import { library } from "@fortawesome/fontawesome-svg-core"
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
-import { fas } from "@fortawesome/free-solid-svg-icons"
-import { fab } from "@fortawesome/free-brands-svg-icons"
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { fas } from "@fortawesome/free-solid-svg-icons";
+import { fab } from "@fortawesome/free-brands-svg-icons";
 
 // Configuration de Fontawesome
-library.add(fas, fab)
+library.add(fas, fab);
 
 // Création de l'application
-const app = createApp(App)
+const app = createApp(App);
 
 // Plugins
-app.use(router)
-app.use(createPinia())
+app.use(router);
+app.use(createPinia());
+
 
 // Composants globaux
-app.component("font-awesome-icon", FontAwesomeIcon)
+app.component("font-awesome-icon", FontAwesomeIcon);
 
 // Montage de l'application
-app.mount('#app')
+app.mount('#app');

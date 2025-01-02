@@ -329,17 +329,12 @@ export default {
       }
 
       try {
-        console.log('Selling player with ID:', userPackPlayerId);
-        console.log('User ID:', user.id);
-
         const response = await axios.post(`http://127.0.0.1:8000/api/players/sell/${userPackPlayerId}`, {}, {
           headers: {
             'X-User-Id': user.id,
           },
         });
-
-        console.log('Sell player response:', response.data);
-
+        this.$emit('user-updated');
         this.fetchPlayers(); // Rechargez la liste des joueurs après la vente
       } catch (err) {
         console.error('Error selling player:', err);

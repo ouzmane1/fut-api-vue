@@ -9,6 +9,7 @@ import MyPlayers from "@/views/MyPlayers.vue"
 import AllPlayers from "@/views/AllPlayers.vue"
 import Register from "@/views/Register.vue"
 import Login from "@/views/Login.vue"
+import Admin from "@/views/Admin.vue"
 // import Pack from "@/views/Pack.vue"
 // import SearchPlayer from "@/views/SearchPlayer.vue"
 // import MyPlayer from "@/views/MyPlayer.vue"
@@ -53,6 +54,11 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
+  },
+  {
+    path: "/admin",
+    name: "Admin",
+    component: Admin,
   }
 
   // {

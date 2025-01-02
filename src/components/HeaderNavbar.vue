@@ -1,28 +1,33 @@
 <template>
-  <header class="m-8 mt-5 flex justify-center">
-    <nav class="w-full mx-12 flex flex-row justify-between items-center">
+  <header class="m-8 mt-5 flex justify-center shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
+    <nav class="w-full mx-12 flex flex-row justify-between items-center py-4 px-6">
       <!-- Élément aligné à gauche -->
-      <router-link to="/" class="text-xl font-bold text-gray-800">
+      <router-link to="/" class="text-3xl font-extrabold text-white hover:text-gray-300 transition duration-300">
         <h1>FUTAPI</h1>
       </router-link>
 
       <!-- Élément aligné à droite -->
-      <div v-if="isAuthenticated">
-        <div v-if="isAuthenticated" class="flex items-center">
-        <div class="user-info-box">
-          <span class="text-gray-800 text-xl">{{ currentUser.username }}</span>
-          <span class="text-gray-800 text-xl">{{ currentUser.credit }} crédits</span>
+      <div v-if="isAuthenticated" class="flex items-center space-x-6">
+        <div class="user-info-box flex flex-col text-right">
+          <span class="text-white text-lg font-medium">
+            {{ currentUser.username }}
+          </span>
+          <!-- <span class="text-gray-200 text-sm">
+            {{ currentUser.credits }} crédits
+          </span> -->
+          
         </div>
-        <button @click="handleLogout" class="ml-4 text-gray-800 text-xl cursor-pointer">
+        <button 
+          @click="handleLogout" 
+          class="ml-4 text-white bg-red-600 hover:bg-red-500 text-lg px-4 py-2 rounded-lg shadow-md transition duration-300">
           Logout
         </button>
       </div>
-      </div>
-      <div v-else>
-        <router-link to="/register" class="text-gray-800 text-xl cursor-pointer">
+      <div v-else class="flex space-x-4">
+        <router-link to="/register" class="text-white text-lg bg-blue-400 px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
           Register
         </router-link>
-        <router-link to="/login" class="ml-4 text-gray-800 text-xl cursor-pointer">
+        <router-link to="/login" class="text-white text-lg bg-blue-400 px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
           Login
         </router-link>
       </div>
@@ -31,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -51,42 +56,29 @@ const handleLogout = async () => {
   }
 };
 
-const checkCurrentUser = () => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (user && user.id) {
+const checkCurrentUser = async () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!user || !user.id) {
+      throw new Error('Utilisateur non authentifié');
+    }
+
+    const response = await axios.get(`http://localhost:8000/api/users/${user.id}`);
+    currentUser.value = response.data;
     isAuthenticated.value = true;
-    currentUser.value = user;
+  } catch (error) {
+    console.error('Error fetching current user:', error);
+    isAuthenticated.value = false;
+    currentUser.value = {};
   }
 };
 
 onMounted(() => {
   checkCurrentUser();
 });
+
+watch(() => router.currentRoute.value.path, () => {
+  checkCurrentUser();
+});
 </script>
-
-<style scoped>
-.user-info-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 20px;
-  border: 2px solid #007bff;
-  border-radius: 10px;
-  background-color: #e9f5ff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-right: 10px;
-}
-
-.user-info-box span {
-  margin: 4px 0;
-  font-weight: bold;
-}
-
-.user-info-box span:first-child {
-  color: #007bff;
-}
-
-.user-info-box span:last-child {
-  color: #28a745;
-}
-</style>
