@@ -59,7 +59,17 @@ const routes = [
     path: "/admin",
     name: "Admin",
     component: Admin,
-  }
+    beforeEnter: (to, from, next) => {
+      const user = JSON.parse(localStorage.getItem('user')); // Récupérer l'utilisateur actuel depuis localStorage
+
+      // Vérifier si l'utilisateur est authentifié et si son rôle est admin
+      if (user && user.roles && user.roles.includes('ROLE_ADMIN')) {
+        next(); // Si l'utilisateur est admin, il peut accéder à la route
+      } else {
+        next('/login'); // Sinon, rediriger vers la page de login
+      }
+    }
+  } 
 
   // {
   //   path: '/pack',
