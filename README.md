@@ -1,6 +1,6 @@
-# fut-api-vue
+# Eleves
 Ousmane NDOME 
-Ivane Kastner
+Ivane KASTNER
 
 
 # fut-api-vue
